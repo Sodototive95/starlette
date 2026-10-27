@@ -650,7 +650,7 @@ def test_url_for_with_root_path_ending_with_slash(test_client_factory: TestClien
     assert response.json() == {"index": "https://www.example.org/sub_path/"}
 
 
-async def echo_paths(request: Request) -> JSONResponse:
+async def echo_path_for_urls(request: Request) -> JSONResponse:
     return JSONResponse(
         {
             "index": str(request.path_for("index")),
@@ -659,18 +659,18 @@ async def echo_paths(request: Request) -> JSONResponse:
     )
 
 
-echo_path_routes = [
-    Route("/", echo_paths, name="index", methods=["GET"]),
+echo_path_for_routes = [
+    Route("/", echo_path_for_urls, name="index", methods=["GET"]),
     Mount(
         "/submount",
         name="mount",
-        routes=[Route("/", echo_paths, name="submount", methods=["GET"])],
+        routes=[Route("/", echo_path_for_urls, name="submount", methods=["GET"])],
     ),
 ]
 
 
 def test_path_for_with_root_path(test_client_factory: TestClientFactory) -> None:
-    app = Starlette(routes=echo_path_routes)
+    app = Starlette(routes=echo_path_for_routes)
     client = test_client_factory(app, base_url="https://www.example.org/", root_path="/sub_path")
     response = client.get("/sub_path/")
     assert response.json() == {
